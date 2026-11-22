@@ -1,0 +1,424 @@
+<ion-split-pane contentId="main-content" when="md">
+
+  <!-- LEFT DARK NAVY SIDEBAR -->
+  <ion-menu contentId="main-content" class="navy-sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-brand">
+        <div class="pin-icon">
+          <ion-icon name="school"></ion-icon>
+        </div>
+        <span class="brand-text">Campus<span>Find</span></span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-btn" [class.active]="activeTab === 'read'" (click)="setTab('read')">
+          <ion-icon name="home"></ion-icon>
+          <span>Dashboard</span>
+        </button>
+
+        <button class="nav-btn" [class.active]="activeTab === 'create'" (click)="setTab('create')">
+          <ion-icon name="add-circle"></ion-icon>
+          <span>Create Post</span>
+        </button>
+
+        <button class="nav-btn" [class.active]="activeTab === 'update'" (click)="setTab('update')">
+          <ion-icon name="create"></ion-icon>
+          <span>Update Report</span>
+        </button>
+
+        <button class="nav-btn" [class.active]="activeTab === 'delete'" (click)="setTab('delete')">
+          <ion-icon name="trash"></ion-icon>
+          <span>Delete Item</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <p class="footer-tagline">Find. <span>Explore.</span> Belong.</p>
+        <div class="footer-line"></div>
+        <button class="logout-btn" (click)="logout()">
+          <ion-icon name="log-out"></ion-icon>
+          <span>Sign Out</span>
+        </button>
+      </div>
+    </div>
+  </ion-menu>
+
+  <!-- RIGHT MAIN CONTENT WORKSPACE -->
+  <div class="ion-page main-workspace" id="main-content" (click)="showProfileMenu.set(false); showNotificationsMenu.set(false)">
+    
+    <ion-header class="ion-hide-md-up">
+      <ion-toolbar color="primary">
+        <ion-buttons slot="start">
+          <ion-menu-button></ion-menu-button>
+        </ion-buttons>
+        <span style="font-weight: 700; font-size: 18px; padding-left: 10px;">CampusFind</span>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="dashboard-content">
+      <div class="content-container">
+
+        <!-- TOPBAR -->
+        <header class="topbar">
+          <div class="topbar-brand-title">
+            <h2>Campus<span>Find</span> Dashboard</h2>
+          </div>
+
+          <div class="user-profile-area">
+            
+            <!-- Notification Bell Dropdown Container -->
+            <div class="notif-dropdown-wrap">
+              <div class="notif-bell" (click)="toggleNotificationsMenu($event)">
+                <ion-icon name="notifications"></ion-icon>
+                <span class="badge" *ngIf="hasUnread()">{{ totalReportsCount() }}</span>
+              </div>
+
+              <!-- Notifications Dropdown Menu Box -->
+              <div class="notifications-dropdown-menu" *ngIf="showNotificationsMenu()" (click)="$event.stopPropagation()">
+                <div class="notif-dropdown-header">
+                  <strong>Campus Notifications</strong>
+                  <span>{{ totalReportsCount() }} items</span>
+                </div>
+                <div class="dropdown-divider"></div>
+                
+                <div class="notif-list">
+                  <div *ngIf="items().length === 0" class="empty-notif">No new notifications</div>
+                  
+                  <div 
+                    class="notif-item" 
+                    *ngFor="let item of items()" 
+                    (click)="selectPreview(item); openExpandedModal(item); showNotificationsMenu.set(false)">
+                    <img [src]="item.image_url || 'https://images.unsplash.com/photo-1586769852044-692d6e3703f0?auto=format&fit=crop&w=100&q=60'" class="notif-thumb" />
+                    <div class="notif-text">
+                      <strong>New {{ item.category }} Report</strong>
+                      <p>{{ item.title }} at {{ item.location }}</p>
+                      <small>Posted by {{ item.username || 'Unknown User' }}</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- User Profile Dropdown Container -->
+            <div class="user-profile-dropdown-wrap">
+              <div class="user-chip" (click)="toggleProfileMenu($event)">
+                <div class="avatar">{{ currentUser.charAt(0).toUpperCase() }}</div>
+                <div class="user-text">
+                  <small>Welcome back,</small>
+                  <strong>{{ currentUser }}</strong>
+                </div>
+              </div>
+
+              <!-- Dropdown Menu Box -->
+              <div class="profile-dropdown-menu" *ngIf="showProfileMenu()" (click)="$event.stopPropagation()">
+                <div class="dropdown-header">
+                  <div class="avatar-sm">{{ currentUser.charAt(0).toUpperCase() }}</div>
+                  <div>
+                    <strong>{{ currentUser }}</strong>
+                    <small>Student Account</small>
+                  </div>
+                </div>
+                <div class="dropdown-divider"></div>
+                <button class="dropdown-item" (click)="setTab('read'); showProfileMenu.set(false)">
+                  <ion-icon name="person-circle"></ion-icon> View Dashboard
+                </button>
+                <button class="dropdown-item text-red" (click)="logout()">
+                  <ion-icon name="log-out"></ion-icon> Sign Out
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </header>
+
+        <!-- TAB 1: READ / DASHBOARD VIEW -->
+        <div *ngIf="activeTab === 'read'">
+          
+          <div class="welcome-banner">
+            <div class="banner-text">
+              <h1>Welcome back! 👋</h1>
+              <p>Find what you need, stay connected with your campus.</p>
+              <div class="banner-bar"></div>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon blue"><ion-icon name="megaphone"></ion-icon></div>
+              <div class="stat-info">
+                <h2>{{ totalReportsCount() }}</h2>
+                <span>Total Reports</span>
+              </div>
+              <span class="stat-trend blue-text">Live</span>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon purple"><ion-icon name="search"></ion-icon></div>
+              <div class="stat-info">
+                <h2>{{ lostCount() }}</h2>
+                <span>Lost Items</span>
+              </div>
+              <span class="stat-trend purple-text">Active</span>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon green"><ion-icon name="cube"></ion-icon></div>
+              <div class="stat-info">
+                <h2>{{ foundCount() }}</h2>
+                <span>Items Found</span>
+              </div>
+              <span class="stat-trend green-text">Ready</span>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon orange"><ion-icon name="calendar"></ion-icon></div>
+              <div class="stat-info">
+                <h2>{{ claimedCount() }}</h2>
+                <span>Claimed Items</span>
+              </div>
+              <span class="stat-trend orange-text">Resolved</span>
+            </div>
+          </div>
+
+          <div class="bottom-grid">
+            
+            <!-- Left: Recent Feed Reports -->
+            <div class="panel-card feed-panel">
+              <div class="panel-header">
+                <h3><ion-icon name="megaphone" class="title-icon"></ion-icon> Recent Feed Reports</h3>
+                <span class="view-all">{{ items().length }} items</span>
+              </div>
+
+              <div *ngIf="items().length === 0" class="empty-state">
+                No reports found. Click <strong>Create Post</strong> to add a new report!
+              </div>
+
+              <div 
+                class="feed-row" 
+                *ngFor="let item of items()" 
+                [class.selected-row]="selectedPreviewItem()?.id === item.id"
+                (click)="selectPreview(item)">
+                <img [src]="item.image_url || 'https://images.unsplash.com/photo-1586769852044-692d6e3703f0?auto=format&fit=crop&w=200&q=60'" alt="item" class="row-thumb" />
+                <div class="row-details">
+                  <h4>{{ item.title }} <small class="author-tag">by {{ item.username || 'Unknown User' }}</small></h4>
+                  <p>
+                    <ion-icon name="location" class="pin-red"></ion-icon> {{ item.location }}
+                    <span class="see-more-link" (click)="openExpandedModal(item, $event)">See more...</span>
+                  </p>
+                </div>
+                <span class="status-pill" [ngClass]="item.category.toLowerCase()">{{ item.category }}</span>
+                <ion-icon name="chevron-forward" class="chevron"></ion-icon>
+              </div>
+            </div>
+
+            <!-- Right: Preview & Quick Actions -->
+            <div class="right-column">
+              <div class="panel-card preview-panel" *ngIf="selectedPreviewItem() as preview">
+                <div class="panel-header">
+                  <h3><ion-icon name="cube" class="title-icon"></ion-icon> {{ preview.title }}</h3>
+                  <a class="view-details" (click)="openExpandedModal(preview)">Maximize Photo →</a>
+                </div>
+                <img *ngIf="preview.image_url" [src]="preview.image_url" class="preview-img" (click)="openExpandedModal(preview)" style="cursor: pointer;" />
+                <p class="preview-desc">{{ preview.description }}</p>
+                <div class="preview-footer">
+                  <span><ion-icon name="location" class="pin-red"></ion-icon> {{ preview.location }}</span>
+                  <span class="status-pill" [ngClass]="preview.category.toLowerCase()">{{ preview.category }}</span>
+                </div>
+              </div>
+
+              <div class="panel-card quick-actions-panel">
+                <div class="panel-header">
+                  <h3><ion-icon name="flash" class="title-icon"></ion-icon> Quick Actions</h3>
+                </div>
+                <div class="actions-grid">
+                  <button class="action-tile primary-tile" (click)="setTab('create')">
+                    <ion-icon name="add-circle"></ion-icon>
+                    <span>Create<br />Post</span>
+                  </button>
+                  <button class="action-tile soft-tile" (click)="setTab('update')">
+                    <ion-icon name="create"></ion-icon>
+                    <span>Update<br />Report</span>
+                  </button>
+                  <button class="action-tile soft-tile" (click)="setTab('delete')">
+                    <ion-icon name="trash"></ion-icon>
+                    <span>Delete<br />Item</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- TAB 2: CREATE -->
+        <div *ngIf="activeTab === 'create'" class="crud-container">
+          <div class="panel-card form-card">
+            <div class="panel-header">
+              <h3><ion-icon name="add-circle" class="title-icon"></ion-icon> Post a New Lost or Found Item</h3>
+            </div>
+            <form (ngSubmit)="submitItem()" class="modern-form">
+              <div class="form-row">
+                <div class="field">
+                  <label>Item Title</label>
+                  <input type="text" [(ngModel)]="newItem.title" name="title" placeholder="e.g., Scientific Calculator" required />
+                </div>
+                <div class="field">
+                  <label>Category / Status</label>
+                  <select [(ngModel)]="newItem.category" name="category">
+                    <option value="Lost">Lost</option>
+                    <option value="Found">Found</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="field">
+                  <label>Location Found / Lost</label>
+                  <input type="text" [(ngModel)]="newItem.location" name="location" placeholder="e.g., 2nd Floor, Room 206" required />
+                </div>
+                <div class="field">
+                  <label>Contact Information</label>
+                  <input type="text" [(ngModel)]="newItem.contact_info" name="contact_info" placeholder="Phone number or email" required />
+                </div>
+              </div>
+
+              <div class="field">
+                <label>Upload Item Photo</label>
+                <input type="file" (change)="onFileSelected($event)" accept="image/*" class="file-input" />
+              </div>
+
+              <div class="field">
+                <label>Detailed Description</label>
+                <textarea [(ngModel)]="newItem.description" name="description" rows="3" placeholder="Color, brand, identifying marks..." required></textarea>
+              </div>
+
+              <button type="submit" class="btn-primary">Submit Report to Feed</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- TAB 3: UPDATE -->
+        <div *ngIf="activeTab === 'update'" class="crud-container">
+          <div *ngIf="editingItem" class="panel-card form-card" style="margin-bottom: 20px; border: 2px solid #1d63dc;">
+            <div class="panel-header">
+              <h3>Editing Report #{{ editingItem.id }}: {{ editingItem.title }}</h3>
+            </div>
+            <form (ngSubmit)="saveUpdate()" class="modern-form">
+              <div class="form-row">
+                <div class="field">
+                  <label>Item Title</label>
+                  <input type="text" [(ngModel)]="editingItem.title" name="editTitle" required />
+                </div>
+                <div class="field">
+                  <label>Status / Category</label>
+                  <select [(ngModel)]="editingItem.category" name="editCategory">
+                    <option value="Lost">Lost</option>
+                    <option value="Found">Found</option>
+                    <option value="Claimed">Claimed (Resolved)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="field">
+                  <label>Location</label>
+                  <input type="text" [(ngModel)]="editingItem.location" name="editLocation" required />
+                </div>
+                <div class="field">
+                  <label>Contact Info</label>
+                  <input type="text" [(ngModel)]="editingItem.contact_info" name="editContact" required />
+                </div>
+              </div>
+
+              <div class="field">
+                <label>Description</label>
+                <textarea [(ngModel)]="editingItem.description" name="editDesc" rows="3" required></textarea>
+              </div>
+
+              <div style="display: flex; gap: 12px;">
+                <button type="submit" class="btn-primary">Save Changes</button>
+                <button type="button" class="btn-secondary" (click)="editingItem = null">Cancel</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="panel-card">
+            <div class="panel-header">
+              <h3><ion-icon name="create" class="title-icon"></ion-icon> Your Posted Reports</h3>
+            </div>
+            <div *ngIf="myItems().length === 0" class="empty-state">You haven't posted any reports yet.</div>
+            
+            <div class="feed-row" *ngFor="let item of myItems()">
+              <img [src]="item.image_url || 'https://images.unsplash.com/photo-1586769852044-692d6e3703f0?auto=format&fit=crop&w=200&q=60'" class="row-thumb" />
+              <div class="row-details">
+                <h4>{{ item.title }}</h4>
+                <p><ion-icon name="location" class="pin-red"></ion-icon> {{ item.location }} • {{ item.category }}</p>
+              </div>
+              <button class="btn-small-blue" (click)="selectForEdit(item)">Edit / Status</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: DELETE -->
+        <div *ngIf="activeTab === 'delete'" class="crud-container">
+          <div class="panel-card">
+            <div class="panel-header">
+              <h3><ion-icon name="trash" class="title-icon"></ion-icon> Remove Your Posted Reports</h3>
+            </div>
+            <div *ngIf="myItems().length === 0" class="empty-state">You haven't posted any reports yet.</div>
+
+            <div class="feed-row" *ngFor="let item of myItems()">
+              <img [src]="item.image_url || 'https://images.unsplash.com/photo-1586769852044-692d6e3703f0?auto=format&fit=crop&w=200&q=60'" class="row-thumb" />
+              <div class="row-details">
+                <h4>{{ item.title }}</h4>
+                <p><ion-icon name="location" class="pin-red"></ion-icon> {{ item.location }} • {{ item.category }}</p>
+              </div>
+              <button class="btn-small-red" (click)="deleteItem(item)">Delete Report</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </ion-content>
+  </div>
+
+  <!-- RECTANGULAR MODAL POPUP FOR "SEE MORE" -->
+  <div class="modal-backdrop" *ngIf="modalItem() as m" (click)="closeModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <button class="modal-close-btn" (click)="closeModal()"><ion-icon name="close"></ion-icon></button>
+      
+      <div class="modal-header-info">
+        <span class="status-pill" [ngClass]="m.category.toLowerCase()">{{ m.category }} Report</span>
+        <h2>{{ m.title }}</h2>
+      </div>
+
+      <div class="modal-image-wrapper">
+        <img [src]="m.image_url || 'https://images.unsplash.com/photo-1586769852044-692d6e3703f0?auto=format&fit=crop&w=600&q=80'" alt="Item Photo" />
+      </div>
+
+      <div class="modal-body-content">
+        <div class="info-row">
+          <strong><ion-icon name="location" class="pin-red"></ion-icon> Location:</strong>
+          <span>{{ m.location }}</span>
+        </div>
+        <div class="info-row">
+          <strong><ion-icon name="call" style="color: #1d63dc;"></ion-icon> Contact Info:</strong>
+          <span class="highlight-contact">{{ m.contact_info }}</span>
+        </div>
+        <div class="info-row">
+          <strong><ion-icon name="person-circle" style="color: #08245c;"></ion-icon> Posted By:</strong>
+          <span>{{ m.username || 'Unknown User' }}</span>
+        </div>
+        <div class="info-description">
+          <strong>Detailed Description:</strong>
+          <p>{{ m.description }}</p>
+        </div>
+      </div>
+
+      <div class="modal-footer-actions">
+        <button class="btn-primary" style="width: 100%;" (click)="closeModal()">Close Preview</button>
+      </div>
+    </div>
+  </div>
+
+</ion-split-pane>
