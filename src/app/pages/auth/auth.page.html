@@ -1,0 +1,104 @@
+<ion-content class="auth-content">
+  <div class="auth-container">
+    <div class="auth-split-wrapper">
+      
+      <!-- LEFT HERO CARD SECTION -->
+      <div class="hero-card">
+        <div class="hero-content">
+          <div class="brand-header-wrap">
+            <div class="brand-top">
+              <div class="pin-badge">
+                <ion-icon name="school"></ion-icon>
+              </div>
+              <span class="brand-title">Campus<span>Find</span></span>
+            </div>
+            <div class="brand-tagline">Find. Explore. Belong.</div>
+          </div>
+
+          <div class="hero-center">
+            <h1>Welcome <span>Back!</span></h1>
+            <p>Sign in to continue your CampusFind journey.</p>
+          </div>
+
+          <div class="hero-features-bar">
+            <div class="feature-item">
+              <div class="feature-circle"><ion-icon name="search"></ion-icon></div>
+              <span>Find Resources</span>
+            </div>
+            <div class="feature-item">
+              <div class="feature-circle"><ion-icon name="location"></ion-icon></div>
+              <span>Help Students</span>
+            </div>
+            <div class="feature-item">
+              <div class="feature-circle"><ion-icon name="people"></ion-icon></div>
+              <span>Connect with Others</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT FORM CARD SECTION -->
+      <div class="form-card-wrap">
+        <div class="form-card">
+          
+          <div class="form-header">
+            <div class="form-logo-pin">
+              <ion-icon name="school"></ion-icon>
+            </div>
+            <h2>Campus<span>Find</span></h2>
+            <p>{{ isRegisterMode ? 'Create your account to continue' : 'Welcome back! Sign in to continue' }}</p>
+          </div>
+
+          <form (ngSubmit)="onSubmit()" class="auth-form">
+            
+            <div class="input-group">
+              <div class="input-field">
+                <ion-icon name="person" class="icon-left"></ion-icon>
+                <input 
+                  type="text" 
+                  [(ngModel)]="username" 
+                  name="username" 
+                  placeholder="Username" 
+                  required 
+                />
+              </div>
+            </div>
+
+            <div class="input-group">
+              <div class="input-field">
+                <ion-icon name="lock-closed" class="icon-left"></ion-icon>
+                <input 
+                  [type]="showPassword ? 'text' : 'password'" 
+                  [(ngModel)]="password" 
+                  name="password" 
+                  placeholder="Password" 
+                  required 
+                />
+                <ion-icon 
+                  [name]="showPassword ? 'eye-off' : 'eye'" 
+                  class="icon-eye" 
+                  (click)="togglePasswordVisibility()">
+                </ion-icon>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-signin">
+              <span>{{ isRegisterMode ? 'Register' : 'Sign In' }}</span>
+              <span class="arrow-icon">→</span>
+            </button>
+
+            <div class="divider-text">or</div>
+
+            <div class="auth-footer-prompt">
+              <span *ngIf="!isRegisterMode">Don't have an account? <a (click)="toggleMode()">Register Here</a></span>
+              <span *ngIf="isRegisterMode">Already have an account? <a (click)="toggleMode()">Sign In Here</a></span>
+            </div>
+
+          </form>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</ion-content>
